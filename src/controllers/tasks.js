@@ -39,6 +39,25 @@ const taskController = {
     }
   },
 
+  async createBulk(req, res) {
+    try {
+      const { tasks } = req.body;
+      if (!Array.isArray(tasks) || tasks.length === 0) {
+        return res.status(400).json({ error: 'Tasks array is required and must not be empty' });
+      }
+      for (const task of tasks) {
+        if (!task.title || typeof task.title !== 'string' || task.title.trim() === '') {
+          return res.status(400).json({ error: 'Each task must have a valid title' });
+        }
+      }
+      const sanitized = tasks.map(t => ({ title: t.title.trim(), description: t.description }));
+      const created = await Task.createBulk(sanitized);
+      res.status(201).json(created);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to create tasks' });
+    }
+  },
+
   async update(req, res) {
     try {
       const { id } = req.params;

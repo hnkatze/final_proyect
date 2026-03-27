@@ -37,6 +37,16 @@ const Task = {
     return result.rows[0] || null;
   },
 
+  async createBulk(tasks) {
+    const values = tasks.map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2})`).join(', ');
+    const params = tasks.flatMap(t => [t.title, t.description || null]);
+    const result = await pool.query(
+      `INSERT INTO tasks (title, description) VALUES ${values} RETURNING *`,
+      params
+    );
+    return result.rows;
+  },
+
   async delete(id) {
     const result = await pool.query(
       'DELETE FROM tasks WHERE id = $1 RETURNING *',

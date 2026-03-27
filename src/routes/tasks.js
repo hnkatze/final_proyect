@@ -104,6 +104,46 @@ router.post('/', taskController.create);
 
 /**
  * @swagger
+ * /tasks/bulk:
+ *   post:
+ *     summary: Crear multiples tareas
+ *     description: Crea varias tareas en una sola peticion.
+ *     tags: [Tasks]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [tasks]
+ *             properties:
+ *               tasks:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/TaskInput'
+ *           example:
+ *             tasks:
+ *               - title: "Tarea 1"
+ *                 description: "Primera tarea"
+ *               - title: "Tarea 2"
+ *                 description: "Segunda tarea"
+ *               - title: "Tarea 3"
+ *     responses:
+ *       201:
+ *         description: Tareas creadas exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Task'
+ *       400:
+ *         description: Datos invalidos
+ */
+router.post('/bulk', taskController.createBulk);
+
+/**
+ * @swagger
  * /tasks/{id}:
  *   put:
  *     summary: Actualizar tarea
