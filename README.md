@@ -65,6 +65,7 @@ Construir un pipeline completo de desarrollo, testing, integracion continua y de
 | Base de datos | PostgreSQL 16 |
 | Testing | Jest + Supertest |
 | Linting | ESLint |
+| Documentacion API | Swagger (OpenAPI 3.0) |
 | Contenedores | Docker + Docker Compose |
 | CI/CD | GitHub Actions |
 | Deploy | Railway |
@@ -129,6 +130,15 @@ docker-compose down -v
 ```
 
 La app estara en `http://localhost:3000` y PostgreSQL en `localhost:5432`.
+
+## Documentacion API (Swagger)
+
+La API cuenta con documentacion interactiva generada con Swagger/OpenAPI 3.0:
+
+- **Swagger UI**: `http://localhost:3000/api/docs` (interfaz interactiva)
+- **JSON Spec**: `http://localhost:3000/api/docs.json` (especificacion OpenAPI)
+
+Desde Swagger UI puedes probar todos los endpoints directamente desde el navegador.
 
 ## Endpoints
 
