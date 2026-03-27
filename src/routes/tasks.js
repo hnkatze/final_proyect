@@ -7,33 +7,86 @@ const router = Router();
  * @swagger
  * /tasks:
  *   get:
- *     summary: Listar todas las tareas
- *     description: Retorna un array con todas las tareas ordenadas por fecha de creacion descendente.
+ *     summary: Listar tareas con filtros y paginacion
+ *     description: Retorna tareas filtradas por estado, prioridad o busqueda, con paginacion.
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: query
+ *         name: completed
+ *         schema:
+ *           type: boolean
+ *         description: Filtrar por estado (true/false)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Buscar en titulo y descripcion
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *           enum: [low, medium, high]
+ *         description: Filtrar por prioridad
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Numero de pagina
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Tareas por pagina (max 100)
+ *     responses:
+ *       200:
+ *         description: Lista paginada de tareas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 tasks:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Task'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
+ */
+router.get('/', taskController.getAll);
+
+/**
+ * @swagger
+ * /tasks/stats:
+ *   get:
+ *     summary: Estadisticas de tareas
+ *     description: Retorna contadores y porcentaje de completado agrupados por estado y prioridad.
  *     tags: [Tasks]
  *     responses:
  *       200:
- *         description: Lista de tareas
+ *         description: Estadisticas
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Task'
- *       500:
- *         description: Error del servidor
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ *               $ref: '#/components/schemas/StatsResponse'
  */
-router.get('/', taskController.getAll);
+router.get('/stats', taskController.getStats);
 
 /**
  * @swagger
  * /tasks/{id}:
  *   get:
  *     summary: Obtener tarea por ID
- *     description: Retorna una tarea especifica segun su ID.
  *     tags: [Tasks]
  *     parameters:
  *       - in: path
@@ -41,8 +94,6 @@ router.get('/', taskController.getAll);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID de la tarea
- *         example: 1
  *     responses:
  *       200:
  *         description: Tarea encontrada
@@ -50,22 +101,8 @@ router.get('/', taskController.getAll);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Task'
- *       400:
- *         description: ID invalido
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *             example:
- *               error: "Invalid task ID"
  *       404:
  *         description: Tarea no encontrada
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *             example:
- *               error: "Task not found"
  */
 router.get('/:id', taskController.getById);
 
@@ -74,7 +111,6 @@ router.get('/:id', taskController.getById);
  * /tasks:
  *   post:
  *     summary: Crear nueva tarea
- *     description: Crea una nueva tarea con titulo obligatorio y descripcion opcional.
  *     tags: [Tasks]
  *     requestBody:
  *       required: true
@@ -84,21 +120,9 @@ router.get('/:id', taskController.getById);
  *             $ref: '#/components/schemas/TaskInput'
  *     responses:
  *       201:
- *         description: Tarea creada exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Task'
+ *         description: Tarea creada
  *       400:
- *         description: Datos invalidos (titulo requerido)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *             example:
- *               error: "Title is required"
- *       500:
- *         description: Error del servidor
+ *         description: Datos invalidos
  */
 router.post('/', taskController.create);
 
@@ -107,7 +131,6 @@ router.post('/', taskController.create);
  * /tasks/bulk:
  *   post:
  *     summary: Crear multiples tareas
- *     description: Crea varias tareas en una sola peticion.
  *     tags: [Tasks]
  *     requestBody:
  *       required: true
@@ -125,18 +148,12 @@ router.post('/', taskController.create);
  *             tasks:
  *               - title: "Tarea 1"
  *                 description: "Primera tarea"
+ *                 priority: "high"
  *               - title: "Tarea 2"
- *                 description: "Segunda tarea"
- *               - title: "Tarea 3"
+ *                 priority: "low"
  *     responses:
  *       201:
- *         description: Tareas creadas exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Task'
+ *         description: Tareas creadas
  *       400:
  *         description: Datos invalidos
  */
@@ -147,7 +164,6 @@ router.post('/bulk', taskController.createBulk);
  * /tasks/{id}:
  *   put:
  *     summary: Actualizar tarea
- *     description: Actualiza los campos de una tarea existente. Solo se actualizan los campos enviados.
  *     tags: [Tasks]
  *     parameters:
  *       - in: path
@@ -155,8 +171,6 @@ router.post('/bulk', taskController.createBulk);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID de la tarea a actualizar
- *         example: 1
  *     requestBody:
  *       required: true
  *       content:
@@ -166,16 +180,8 @@ router.post('/bulk', taskController.createBulk);
  *     responses:
  *       200:
  *         description: Tarea actualizada
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Task'
- *       400:
- *         description: ID invalido
  *       404:
  *         description: Tarea no encontrada
- *       500:
- *         description: Error del servidor
  */
 router.put('/:id', taskController.update);
 
@@ -184,7 +190,6 @@ router.put('/:id', taskController.update);
  * /tasks/{id}:
  *   delete:
  *     summary: Eliminar tarea
- *     description: Elimina una tarea existente y retorna la tarea eliminada.
  *     tags: [Tasks]
  *     parameters:
  *       - in: path
@@ -192,21 +197,11 @@ router.put('/:id', taskController.update);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID de la tarea a eliminar
- *         example: 1
  *     responses:
  *       200:
- *         description: Tarea eliminada exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/DeleteResponse'
- *       400:
- *         description: ID invalido
+ *         description: Tarea eliminada
  *       404:
  *         description: Tarea no encontrada
- *       500:
- *         description: Error del servidor
  */
 router.delete('/:id', taskController.delete);
 

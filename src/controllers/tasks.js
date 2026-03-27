@@ -1,10 +1,19 @@
 const Task = require('../models/task');
 
+const VALID_PRIORITIES = ['low', 'medium', 'high'];
+
 const taskController = {
-  async getAll(_req, res) {
+  async getAll(req, res) {
     try {
-      const tasks = await Task.findAll();
-      res.json(tasks);
+      const { completed, search, priority, page, limit } = req.query;
+      const filters = {};
+      if (completed !== undefined) filters.completed = completed === 'true';
+      if (search) filters.search = search;
+      if (priority && VALID_PRIORITIES.includes(priority)) filters.priority = priority;
+      if (page) filters.page = parseInt(page) || 1;
+      if (limit) filters.limit = Math.min(parseInt(limit) || 20, 100);
+      const result = await Task.findAll(filters);
+      res.json(result);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch tasks' });
     }
@@ -28,11 +37,14 @@ const taskController = {
 
   async create(req, res) {
     try {
-      const { title, description } = req.body;
+      const { title, description, priority } = req.body;
       if (!title || typeof title !== 'string' || title.trim() === '') {
         return res.status(400).json({ error: 'Title is required' });
       }
-      const task = await Task.create({ title: title.trim(), description });
+      if (priority && !VALID_PRIORITIES.includes(priority)) {
+        return res.status(400).json({ error: 'Priority must be low, medium, or high' });
+      }
+      const task = await Task.create({ title: title.trim(), description, priority });
       res.status(201).json(task);
     } catch (error) {
       res.status(500).json({ error: 'Failed to create task' });
@@ -49,8 +61,15 @@ const taskController = {
         if (!task.title || typeof task.title !== 'string' || task.title.trim() === '') {
           return res.status(400).json({ error: 'Each task must have a valid title' });
         }
+        if (task.priority && !VALID_PRIORITIES.includes(task.priority)) {
+          return res.status(400).json({ error: 'Priority must be low, medium, or high' });
+        }
       }
-      const sanitized = tasks.map(t => ({ title: t.title.trim(), description: t.description }));
+      const sanitized = tasks.map(t => ({
+        title: t.title.trim(),
+        description: t.description,
+        priority: t.priority
+      }));
       const created = await Task.createBulk(sanitized);
       res.status(201).json(created);
     } catch (error) {
@@ -63,6 +82,9 @@ const taskController = {
       const { id } = req.params;
       if (isNaN(id)) {
         return res.status(400).json({ error: 'Invalid task ID' });
+      }
+      if (req.body.priority && !VALID_PRIORITIES.includes(req.body.priority)) {
+        return res.status(400).json({ error: 'Priority must be low, medium, or high' });
       }
       const task = await Task.update(id, req.body);
       if (!task) {
@@ -87,6 +109,15 @@ const taskController = {
       res.json({ message: 'Task deleted successfully', task });
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete task' });
+    }
+  },
+
+  async getStats(_req, res) {
+    try {
+      const stats = await Task.getStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch stats' });
     }
   }
 };

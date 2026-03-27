@@ -46,6 +46,12 @@ const options = {
               description: 'Estado de completado',
               example: false,
             },
+            priority: {
+              type: 'string',
+              enum: ['low', 'medium', 'high'],
+              description: 'Nivel de prioridad',
+              example: 'medium',
+            },
             created_at: {
               type: 'string',
               format: 'date-time',
@@ -72,6 +78,12 @@ const options = {
               description: 'Descripcion de la tarea (opcional)',
               example: 'Completar el proyecto final',
             },
+            priority: {
+              type: 'string',
+              enum: ['low', 'medium', 'high'],
+              description: 'Prioridad (default: medium)',
+              example: 'high',
+            },
           },
         },
         TaskUpdate: {
@@ -92,6 +104,24 @@ const options = {
               description: 'Marcar como completada',
               example: true,
             },
+            priority: {
+              type: 'string',
+              enum: ['low', 'medium', 'high'],
+              description: 'Cambiar prioridad',
+              example: 'high',
+            },
+          },
+        },
+        StatsResponse: {
+          type: 'object',
+          properties: {
+            total: { type: 'integer', example: 10 },
+            completed: { type: 'integer', example: 6 },
+            pending: { type: 'integer', example: 4 },
+            high: { type: 'integer', example: 3 },
+            medium: { type: 'integer', example: 5 },
+            low: { type: 'integer', example: 2 },
+            completion_rate: { type: 'number', example: 60.0 },
           },
         },
         Error: {
