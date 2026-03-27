@@ -712,6 +712,152 @@
       transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
+    /* ===== PRIORITY BADGES ===== */
+    .priority-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: inline-block;
+      margin-left: 0.4rem;
+    }
+
+    .priority-high { background: var(--red-dim); color: var(--red); }
+    .priority-medium { background: var(--yellow-dim); color: var(--yellow); }
+    .priority-low { background: rgba(99,102,241,0.15); color: var(--accent-hover); }
+
+    .priority-select {
+      padding: 0.55rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.25s;
+      min-width: 110px;
+    }
+
+    .priority-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+
+    /* ===== FILTER BAR ===== */
+    .filter-bar {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+      animation: fadeUp 0.5s ease-out 0.35s both;
+    }
+
+    .filter-tab {
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .filter-tab:hover { border-color: var(--border-hover); color: var(--text); }
+    .filter-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .filter-tab .count {
+      font-size: 0.65rem;
+      opacity: 0.7;
+      margin-left: 0.25rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 140px;
+      padding: 0.4rem 0.75rem;
+      padding-left: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text);
+      font-size: 0.78rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.25s;
+      margin-left: auto;
+    }
+
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--text-dim); }
+
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 140px;
+      max-width: 240px;
+      margin-left: auto;
+    }
+
+    .search-wrapper svg {
+      position: absolute;
+      left: 0.65rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+
+    /* ===== PAGINATION ===== */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .pagination button {
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pagination button:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
+    .pagination button:disabled { opacity: 0.3; cursor: default; }
+    .pagination .page-info { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+
+    /* ===== STATS GRID ===== */
+    .status-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.5s ease-out 0.2s both;
+    }
+
+    .status-card.rate .number { color: var(--accent-hover); }
+    .status-card.rate .number::after {
+      content: '%';
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 600px) {
       .container { padding: 1.5rem 1rem; }
@@ -782,6 +928,10 @@
         <div class="number" id="pendingCount">0</div>
         <div class="label">Pendientes</div>
       </div>
+      <div class="status-card rate">
+        <div class="number" id="rateCount">0</div>
+        <div class="label">Progreso</div>
+      </div>
     </div>
 
     <!-- Create single -->
@@ -790,6 +940,11 @@
       <div class="form-row">
         <input type="text" id="newTitle" placeholder="Que necesitas hacer?" />
         <input type="text" id="newDesc" placeholder="Descripcion (opcional)" />
+        <select class="priority-select" id="newPriority">
+          <option value="low">Baja</option>
+          <option value="medium" selected>Media</option>
+          <option value="high">Alta</option>
+        </select>
         <button class="btn btn-primary" onclick="createTask()">Crear</button>
       </div>
     </div>
@@ -797,19 +952,26 @@
     <!-- Bulk create -->
     <div class="form-section">
       <h2><span class="icon">++</span> Crear en Lote</h2>
-      <div class="bulk-hint">Una tarea por linea. Formato: <code>titulo | descripcion</code></div>
-      <textarea class="bulk-area" id="bulkInput" placeholder="Estudiar Docker | Completar proyecto&#10;Configurar CI/CD&#10;Escribir tests | Minimo 5 tests"></textarea>
+      <div class="bulk-hint">Una tarea por linea. Formato: <code>titulo | descripcion | prioridad</code> (prioridad: low, medium, high)</div>
+      <textarea class="bulk-area" id="bulkInput" placeholder="Estudiar Docker | Completar proyecto | high&#10;Configurar CI/CD&#10;Escribir tests | Minimo 5 tests | medium"></textarea>
       <button class="btn btn-success" onclick="createBulk()">Crear Todas</button>
     </div>
 
-    <!-- Task list -->
-    <div class="section-header">
-      <h2>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        Tareas
-      </h2>
+    <!-- Filter bar + Task list -->
+    <div class="filter-bar">
+      <button class="filter-tab active" onclick="setFilter('all')" data-filter="all">Todas <span class="count" id="filterAll">0</span></button>
+      <button class="filter-tab" onclick="setFilter('pending')" data-filter="pending">Pendientes <span class="count" id="filterPending">0</span></button>
+      <button class="filter-tab" onclick="setFilter('completed')" data-filter="completed">Completadas <span class="count" id="filterDone">0</span></button>
+      <button class="filter-tab" onclick="setFilter('high')" data-filter="high">Alta</button>
+      <button class="filter-tab" onclick="setFilter('medium')" data-filter="medium">Media</button>
+      <button class="filter-tab" onclick="setFilter('low')" data-filter="low">Baja</button>
+      <div class="search-wrapper">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Buscar tareas..." oninput="debounceSearch()" />
+      </div>
     </div>
     <ul class="task-list" id="taskList"></ul>
+    <div class="pagination" id="pagination"></div>
   </div>
 
   <!-- Edit modal -->
@@ -819,6 +981,11 @@
       <input type="hidden" id="editId" />
       <input type="text" id="editTitle" placeholder="Titulo" />
       <textarea id="editDesc" placeholder="Descripcion"></textarea>
+      <select class="priority-select" id="editPriority" style="width:100%;margin-bottom:0.65rem">
+        <option value="low">Baja</option>
+        <option value="medium">Media</option>
+        <option value="high">Alta</option>
+      </select>
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
         <button class="btn btn-primary" onclick="saveEdit()">Guardar</button>
@@ -830,7 +997,10 @@
 
   <script>
     const API = '/api/tasks';
-    let prevCounts = { total: -1, done: -1, pending: -1 };
+    let prevCounts = { total: -1, done: -1, pending: -1, rate: -1 };
+    let currentFilter = 'all';
+    let currentPage = 1;
+    let searchTimer;
 
     // ===== HEALTH CHECK =====
     async function checkHealth() {
@@ -851,16 +1021,13 @@
         const res = await fetch('/api/health');
         const ms = Math.round(performance.now() - start);
         const data = await res.json();
-
         if (data.status === 'ok') {
           panel.className = 'health-panel ok';
           label.textContent = 'Sistema operativo';
           sub.textContent = 'API + PostgreSQL';
           latency.textContent = ms + 'ms';
           time.textContent = new Date(data.timestamp).toLocaleTimeString();
-        } else {
-          throw new Error('unhealthy');
-        }
+        } else { throw new Error('unhealthy'); }
       } catch (e) {
         panel.className = 'health-panel error';
         label.textContent = 'Sin conexion';
@@ -871,39 +1038,73 @@
       setTimeout(() => btn.classList.remove('spinning'), 600);
     }
 
+    // ===== STATS =====
+    async function loadStats() {
+      try {
+        const res = await fetch(API + '/stats');
+        const s = await res.json();
+        setNum('totalCount', s.total);
+        setNum('doneCount', s.completed);
+        setNum('pendingCount', s.pending);
+        setNum('rateCount', parseFloat(s.completion_rate));
+        document.getElementById('progressFill').style.width = s.completion_rate + '%';
+        document.getElementById('filterAll').textContent = s.total;
+        document.getElementById('filterPending').textContent = s.pending;
+        document.getElementById('filterDone').textContent = s.completed;
+      } catch (e) {}
+    }
+
+    function setNum(id, val) {
+      const el = document.getElementById(id);
+      if (el.textContent != val) {
+        el.textContent = val;
+        el.classList.remove('number-animate');
+        void el.offsetWidth;
+        el.classList.add('number-animate');
+      }
+    }
+
+    // ===== FILTERS =====
+    function setFilter(filter) {
+      currentFilter = filter;
+      currentPage = 1;
+      document.querySelectorAll('.filter-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.filter === filter);
+      });
+      loadTasks();
+    }
+
+    function debounceSearch() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => { currentPage = 1; loadTasks(); }, 300);
+    }
+
     // ===== TASKS =====
     async function loadTasks() {
       try {
-        const res = await fetch(API);
-        const tasks = await res.json();
-        renderTasks(tasks);
-        updateStats(tasks);
+        const params = new URLSearchParams();
+        const search = document.getElementById('searchInput').value.trim();
+        if (search) params.set('search', search);
+        if (currentFilter === 'pending') params.set('completed', 'false');
+        if (currentFilter === 'completed') params.set('completed', 'true');
+        if (['high', 'medium', 'low'].includes(currentFilter)) params.set('priority', currentFilter);
+        params.set('page', currentPage);
+        params.set('limit', 15);
+
+        const res = await fetch(API + '?' + params);
+        const data = await res.json();
+        renderTasks(data.tasks);
+        renderPagination(data.pagination);
+        loadStats();
       } catch (e) {
         document.getElementById('taskList').innerHTML =
           '<div class="empty-state"><p>Error al cargar tareas</p></div>';
       }
     }
 
-    function animateNumber(el, value) {
-      el.textContent = value;
-      el.classList.remove('number-animate');
-      void el.offsetWidth;
-      el.classList.add('number-animate');
-    }
-
-    function updateStats(tasks) {
-      const total = tasks.length;
-      const done = tasks.filter(t => t.completed).length;
-      const pending = total - done;
-
-      if (total !== prevCounts.total) animateNumber(document.getElementById('totalCount'), total);
-      if (done !== prevCounts.done) animateNumber(document.getElementById('doneCount'), done);
-      if (pending !== prevCounts.pending) animateNumber(document.getElementById('pendingCount'), pending);
-
-      prevCounts = { total, done, pending };
-
-      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-      document.getElementById('progressFill').style.width = pct + '%';
+    function priorityBadge(p) {
+      const labels = { high: 'Alta', medium: 'Media', low: 'Baja' };
+      return `<span class="priority-badge priority-${p}">${labels[p] || p}</span>`;
     }
 
     function renderTasks(tasks) {
@@ -914,28 +1115,40 @@
             <div class="empty-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
             </div>
-            <p>No hay tareas todavia</p>
-            <p class="sub">Crea una tarea arriba para comenzar</p>
+            <p>No hay tareas</p>
+            <p class="sub">${currentFilter !== 'all' ? 'Prueba con otro filtro' : 'Crea una tarea arriba para comenzar'}</p>
           </div>`;
         return;
       }
       list.innerHTML = tasks.map((t, i) => `
-        <li class="task-item ${t.completed ? 'completed' : ''}" style="animation-delay:${i * 0.04}s">
+        <li class="task-item ${t.completed ? 'completed' : ''}" style="animation-delay:${i * 0.03}s">
           <div class="task-checkbox" onclick="toggleTask(${t.id}, ${!t.completed})">
             <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <div class="task-info">
-            <div class="task-title">${esc(t.title)}</div>
+            <div class="task-title">${esc(t.title)} ${priorityBadge(t.priority)}</div>
             ${t.description ? `<div class="task-desc">${esc(t.description)}</div>` : ''}
             <div class="task-date">${new Date(t.created_at).toLocaleString()}</div>
           </div>
           <div class="task-actions">
-            <button class="btn btn-ghost btn-sm" onclick="openEdit(${t.id}, '${esc(t.title)}', '${esc(t.description || '')}')">Editar</button>
+            <button class="btn btn-ghost btn-sm" onclick="openEdit(${t.id}, '${esc(t.title)}', '${esc(t.description || '')}', '${t.priority}')">Editar</button>
             <button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})">Eliminar</button>
           </div>
         </li>
       `).join('');
     }
+
+    function renderPagination(p) {
+      const el = document.getElementById('pagination');
+      if (p.pages <= 1) { el.innerHTML = ''; return; }
+      el.innerHTML = `
+        <button onclick="goPage(${p.page - 1})" ${p.page <= 1 ? 'disabled' : ''}>Anterior</button>
+        <span class="page-info">${p.page} / ${p.pages}</span>
+        <button onclick="goPage(${p.page + 1})" ${p.page >= p.pages ? 'disabled' : ''}>Siguiente</button>
+      `;
+    }
+
+    function goPage(n) { currentPage = n; loadTasks(); }
 
     function esc(str) {
       const d = document.createElement('div');
@@ -946,17 +1159,20 @@
     async function createTask() {
       const titleEl = document.getElementById('newTitle');
       const descEl = document.getElementById('newDesc');
+      const prioEl = document.getElementById('newPriority');
       const title = titleEl.value.trim();
       const description = descEl.value.trim();
+      const priority = prioEl.value;
       if (!title) return toast('El titulo es obligatorio', 'error');
       const res = await fetch(API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description: description || undefined })
+        body: JSON.stringify({ title, description: description || undefined, priority })
       });
       if (res.ok) {
         titleEl.value = '';
         descEl.value = '';
+        prioEl.value = 'medium';
         toast('Tarea creada');
         loadTasks();
       } else {
@@ -969,8 +1185,11 @@
       const raw = document.getElementById('bulkInput').value.trim();
       if (!raw) return toast('Escribe al menos una tarea', 'error');
       const tasks = raw.split('\n').filter(l => l.trim()).map(line => {
-        const [title, ...rest] = line.split('|');
-        return { title: title.trim(), description: rest.join('|').trim() || undefined };
+        const parts = line.split('|').map(s => s.trim());
+        const task = { title: parts[0] };
+        if (parts[1]) task.description = parts[1];
+        if (parts[2] && ['low','medium','high'].includes(parts[2])) task.priority = parts[2];
+        return task;
       });
       const res = await fetch(API + '/bulk', {
         method: 'POST',
@@ -1003,10 +1222,11 @@
       if (res.ok) { toast('Tarea eliminada'); loadTasks(); }
     }
 
-    function openEdit(id, title, desc) {
+    function openEdit(id, title, desc, priority) {
       document.getElementById('editId').value = id;
       document.getElementById('editTitle').value = title;
       document.getElementById('editDesc').value = desc;
+      document.getElementById('editPriority').value = priority || 'medium';
       document.getElementById('editModal').classList.add('active');
       document.getElementById('editTitle').focus();
     }
@@ -1019,11 +1239,12 @@
       const id = document.getElementById('editId').value;
       const title = document.getElementById('editTitle').value.trim();
       const description = document.getElementById('editDesc').value.trim();
+      const priority = document.getElementById('editPriority').value;
       if (!title) return toast('El titulo es obligatorio', 'error');
       const res = await fetch(`${API}/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description })
+        body: JSON.stringify({ title, description, priority })
       });
       if (res.ok) { closeModal(); toast('Tarea actualizada'); loadTasks(); }
     }
@@ -1040,6 +1261,9 @@
     document.getElementById('newTitle').addEventListener('keydown', e => {
       if (e.key === 'Enter') createTask();
     });
+    document.getElementById('searchInput').addEventListener('keydown', e => {
+      if (e.key === 'Escape') { e.target.value = ''; loadTasks(); }
+    });
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeModal();
     });
@@ -1047,8 +1271,6 @@
     // Init
     checkHealth();
     loadTasks();
-
-    // Auto-refresh health every 30s
     setInterval(checkHealth, 30000);
   </script>
 </body>
