@@ -79,6 +79,37 @@ describe('POST /api/tasks', () => {
   });
 });
 
+describe('POST /api/tasks/bulk', () => {
+  it('should create multiple tasks', async () => {
+    const res = await request(app)
+      .post('/api/tasks/bulk')
+      .send({ tasks: [
+        { title: 'Task A', description: 'First' },
+        { title: 'Task B' },
+        { title: 'Task C', description: 'Third' }
+      ]});
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveLength(3);
+    expect(res.body[0].title).toBe('Task A');
+    expect(res.body[1].title).toBe('Task B');
+  });
+
+  it('should return 400 when tasks array is empty', async () => {
+    const res = await request(app)
+      .post('/api/tasks/bulk')
+      .send({ tasks: [] });
+    expect(res.status).toBe(400);
+  });
+
+  it('should return 400 when a task has no title', async () => {
+    const res = await request(app)
+      .post('/api/tasks/bulk')
+      .send({ tasks: [{ title: 'Good' }, { description: 'No title' }] });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Each task must have a valid title');
+  });
+});
+
 describe('GET /api/tasks/:id', () => {
   it('should return a task by id', async () => {
     const { rows } = await pool.query(
