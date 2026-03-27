@@ -4,294 +4,652 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Task Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    :root {
+      --bg: #09090b;
+      --surface: #18181b;
+      --surface-hover: #1f1f23;
+      --border: #27272a;
+      --border-hover: #3f3f46;
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --green: #22c55e;
+      --green-dim: #166534;
+      --red: #ef4444;
+      --red-dim: #7f1d1d;
+      --yellow: #eab308;
+      --yellow-dim: #713f12;
+      --blue: #3b82f6;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated gradient background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 20%, rgba(99,102,241,0.06) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(34,197,94,0.04) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite alternate;
+      z-index: -1;
+    }
+
+    @keyframes bgShift {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(-5%, -3%); }
     }
 
     .container {
-      max-width: 900px;
+      max-width: 920px;
       margin: 0 auto;
-      padding: 2rem 1rem;
+      padding: 2.5rem 1.25rem;
     }
 
+    /* ===== HEADER ===== */
     header {
       text-align: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid #1e293b;
+      margin-bottom: 2.5rem;
+      animation: fadeDown 0.6s ease-out;
     }
 
-    header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #f8fafc;
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
       margin-bottom: 0.5rem;
     }
 
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      animation: logoPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes logoPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.3); }
+      50% { box-shadow: 0 0 20px 4px rgba(99,102,241,0.15); }
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
     header p {
-      color: #94a3b8;
-      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
     }
 
     .nav-links {
-      margin-top: 0.75rem;
+      margin-top: 1rem;
       display: flex;
       justify-content: center;
-      gap: 1rem;
+      gap: 0.5rem;
     }
 
     .nav-links a {
-      color: #60a5fa;
+      color: var(--text-muted);
       text-decoration: none;
-      font-size: 0.85rem;
-      padding: 0.25rem 0.75rem;
-      border: 1px solid #1e293b;
-      border-radius: 6px;
-      transition: all 0.2s;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: all 0.25s;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
     }
 
     .nav-links a:hover {
-      background: #1e293b;
-      border-color: #60a5fa;
+      color: var(--text);
+      background: var(--surface);
+      border-color: var(--border-hover);
+      transform: translateY(-1px);
     }
 
-    .status-bar {
-      display: flex;
-      gap: 1rem;
+    .nav-links a .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* ===== HEALTH CHECK PANEL ===== */
+    .health-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
       margin-bottom: 1.5rem;
-      flex-wrap: wrap;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: fadeUp 0.5s ease-out 0.1s both;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .health-panel::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--text-dim);
+      transition: background 0.5s;
+    }
+
+    .health-panel.ok::before { background: var(--green); }
+    .health-panel.error::before { background: var(--red); }
+    .health-panel.checking::before {
+      background: var(--yellow);
+      animation: healthPulseBar 1s ease-in-out infinite;
+    }
+
+    @keyframes healthPulseBar {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .health-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .health-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      position: relative;
+      transition: background 0.5s;
+    }
+
+    .health-panel.ok .health-indicator { background: var(--green); }
+    .health-panel.error .health-indicator { background: var(--red); }
+    .health-panel.checking .health-indicator {
+      background: var(--yellow);
+      animation: indicatorPing 1.5s ease-in-out infinite;
+    }
+
+    .health-panel.ok .health-indicator::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid var(--green);
+      opacity: 0;
+      animation: pingRing 2s ease-out infinite;
+    }
+
+    @keyframes pingRing {
+      0% { transform: scale(0.8); opacity: 0.6; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+
+    @keyframes indicatorPing {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+    }
+
+    .health-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .health-sublabel {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .health-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .health-meta {
+      text-align: right;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    .health-refresh {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .health-refresh:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+      border-color: var(--border-hover);
+    }
+
+    .health-refresh.spinning svg {
+      animation: spin 0.6s linear;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== STATUS CARDS ===== */
+    .status-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.5s ease-out 0.2s both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .status-card {
-      flex: 1;
-      min-width: 120px;
-      background: #1e293b;
-      border-radius: 8px;
-      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1rem;
       text-align: center;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
     }
+
+    .status-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      right: 20%;
+      height: 2px;
+      border-radius: 2px;
+      opacity: 0;
+      transition: all 0.3s;
+    }
+
+    .status-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+
+    .status-card:hover::after { opacity: 1; }
+    .status-card.total::after { background: var(--accent); }
+    .status-card.done::after { background: var(--green); }
+    .status-card.pending::after { background: var(--yellow); }
 
     .status-card .number {
-      font-size: 1.75rem;
+      font-size: 2rem;
       font-weight: 700;
-      color: #f8fafc;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.3s;
     }
+
+    .status-card.total .number { color: var(--accent-hover); }
+    .status-card.done .number { color: var(--green); }
+    .status-card.pending .number { color: var(--yellow); }
 
     .status-card .label {
-      font-size: 0.75rem;
-      color: #94a3b8;
+      font-size: 0.7rem;
+      color: var(--text-dim);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
+      margin-top: 0.25rem;
+      font-weight: 500;
     }
 
-    .status-card.total .number { color: #60a5fa; }
-    .status-card.done .number { color: #34d399; }
-    .status-card.pending .number { color: #fbbf24; }
+    .number-animate {
+      animation: countPop 0.3s ease-out;
+    }
 
-    /* Forms */
+    @keyframes countPop {
+      0% { transform: scale(1.4); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ===== FORMS ===== */
     .form-section {
-      background: #1e293b;
-      border-radius: 10px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      animation: fadeUp 0.5s ease-out 0.3s both;
+      transition: border-color 0.3s;
     }
+
+    .form-section:focus-within { border-color: var(--border-hover); }
 
     .form-section h2 {
-      font-size: 1rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      margin-bottom: 1rem;
-      color: #f8fafc;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-section h2 .icon {
+      font-size: 1rem;
+      opacity: 0.7;
     }
 
     .form-row {
       display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
+      gap: 0.5rem;
     }
 
-    .form-row input {
-      flex: 1;
-      min-width: 150px;
-      padding: 0.6rem 0.85rem;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      color: #e2e8f0;
-      font-size: 0.9rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-row input:focus { border-color: #60a5fa; }
-    .form-row input::placeholder { color: #64748b; }
-
-    .btn {
-      padding: 0.6rem 1.25rem;
-      border: none;
-      border-radius: 6px;
+    input, textarea {
+      padding: 0.55rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
       font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.25s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+
+    input::placeholder, textarea::placeholder { color: var(--text-dim); }
+
+    .form-row input { flex: 1; min-width: 0; }
+
+    .bulk-area {
+      width: 100%;
+      min-height: 72px;
+      resize: vertical;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      margin-bottom: 0.6rem;
+      line-height: 1.6;
+    }
+
+    .bulk-hint {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-bottom: 0.6rem;
+    }
+
+    .bulk-hint code {
+      background: var(--bg);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      padding: 0.55rem 1.1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.8rem;
       font-weight: 500;
+      font-family: inherit;
       cursor: pointer;
       transition: all 0.2s;
       white-space: nowrap;
+      position: relative;
+      overflow: hidden;
     }
 
-    .btn-primary { background: #3b82f6; color: #fff; }
-    .btn-primary:hover { background: #2563eb; }
-    .btn-success { background: #22c55e; color: #fff; }
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(255,255,255,0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover::after { opacity: 1; }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-success { background: var(--green); color: #fff; }
     .btn-success:hover { background: #16a34a; }
-    .btn-danger { background: #ef4444; color: #fff; }
-    .btn-danger:hover { background: #dc2626; }
-    .btn-secondary { background: #334155; color: #e2e8f0; }
-    .btn-secondary:hover { background: #475569; }
-    .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+    .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); }
+    .btn-danger:hover { background: var(--red-dim); }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--surface-hover); color: var(--text); }
+    .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
 
-    /* Bulk form */
-    .bulk-area {
-      width: 100%;
-      min-height: 80px;
-      padding: 0.75rem;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      color: #e2e8f0;
-      font-family: 'Cascadia Code', 'Fira Code', monospace;
-      font-size: 0.85rem;
-      resize: vertical;
-      outline: none;
+    /* ===== TASK LIST ===== */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin-bottom: 0.75rem;
+      margin-top: 0.5rem;
+      animation: fadeUp 0.5s ease-out 0.4s both;
     }
 
-    .bulk-area:focus { border-color: #60a5fa; }
-
-    .bulk-hint {
-      font-size: 0.75rem;
-      color: #64748b;
-      margin-bottom: 0.75rem;
+    .section-header h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
-    /* Task list */
     .task-list { list-style: none; }
 
     .task-item {
-      background: #1e293b;
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.4rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      transition: background 0.15s;
+      transition: all 0.25s;
+      animation: taskSlideIn 0.35s ease-out both;
     }
 
-    .task-item:hover { background: #253348; }
+    @keyframes taskSlideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
 
-    .task-item.completed { opacity: 0.6; }
+    .task-item:hover {
+      border-color: var(--border-hover);
+      background: var(--surface-hover);
+    }
+
+    .task-item.completed { opacity: 0.5; }
+    .task-item.completed:hover { opacity: 0.7; }
 
     .task-checkbox {
       width: 20px;
       height: 20px;
-      border-radius: 50%;
-      border: 2px solid #475569;
+      border-radius: 6px;
+      border: 2px solid var(--border-hover);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      transition: all 0.2s;
+      transition: all 0.25s;
     }
+
+    .task-checkbox:hover { border-color: var(--accent); }
 
     .task-item.completed .task-checkbox {
-      background: #22c55e;
-      border-color: #22c55e;
+      background: var(--green);
+      border-color: var(--green);
+      animation: checkPop 0.3s ease-out;
     }
 
-    .task-checkbox::after {
-      content: '';
-      display: none;
-      width: 6px;
-      height: 10px;
-      border: solid #fff;
-      border-width: 0 2px 2px 0;
-      transform: rotate(45deg);
-      margin-bottom: 2px;
+    @keyframes checkPop {
+      0% { transform: scale(0.8); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
     }
 
-    .task-item.completed .task-checkbox::after { display: block; }
+    .task-checkbox svg {
+      width: 12px;
+      height: 12px;
+      stroke: #fff;
+      stroke-width: 3;
+      fill: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .task-item.completed .task-checkbox svg { opacity: 1; }
 
     .task-info { flex: 1; min-width: 0; }
 
     .task-title {
       font-weight: 500;
-      color: #f1f5f9;
-      margin-bottom: 0.15rem;
+      font-size: 0.9rem;
+      color: var(--text);
+      transition: all 0.2s;
     }
 
     .task-item.completed .task-title {
       text-decoration: line-through;
-      color: #94a3b8;
+      color: var(--text-dim);
     }
 
     .task-desc {
-      font-size: 0.8rem;
-      color: #64748b;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-top: 0.1rem;
     }
 
     .task-date {
-      font-size: 0.7rem;
-      color: #475569;
-      font-family: monospace;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 0.2rem;
+      opacity: 0.7;
     }
 
     .task-actions {
       display: flex;
-      gap: 0.4rem;
+      gap: 0.3rem;
       flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.2s;
     }
+
+    .task-item:hover .task-actions { opacity: 1; }
 
     .empty-state {
       text-align: center;
-      padding: 3rem;
-      color: #64748b;
+      padding: 4rem 2rem;
+      color: var(--text-dim);
+      animation: fadeUp 0.5s ease-out;
     }
 
-    .empty-state svg {
-      width: 48px;
-      height: 48px;
+    .empty-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
       margin-bottom: 1rem;
-      opacity: 0.5;
+      animation: float 3s ease-in-out infinite;
     }
 
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .empty-state p { font-size: 0.85rem; }
+    .empty-state .sub { font-size: 0.75rem; margin-top: 0.35rem; color: var(--text-dim); }
+
+    /* ===== TOAST ===== */
     .toast {
       position: fixed;
       bottom: 1.5rem;
       right: 1.5rem;
-      padding: 0.75rem 1.25rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
+      padding: 0.7rem 1.1rem;
+      border-radius: 10px;
+      font-size: 0.82rem;
       font-weight: 500;
-      transform: translateY(100px);
+      font-family: inherit;
+      transform: translateY(80px) scale(0.95);
       opacity: 0;
-      transition: all 0.3s;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 100;
+      backdrop-filter: blur(8px);
+      border: 1px solid;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.success { background: #22c55e; color: #fff; }
-    .toast.error { background: #ef4444; color: #fff; }
+    .toast.show { transform: translateY(0) scale(1); opacity: 1; }
+    .toast.success { background: rgba(34,197,94,0.15); color: var(--green); border-color: var(--green-dim); }
+    .toast.error { background: rgba(239,68,68,0.15); color: var(--red); border-color: var(--red-dim); }
 
-    /* Edit modal */
+    /* ===== MODAL ===== */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
       z-index: 50;
       align-items: center;
       justify-content: center;
@@ -299,65 +657,117 @@
 
     .modal-overlay.active { display: flex; }
 
+    .modal-overlay.active .modal {
+      animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
     .modal {
-      background: #1e293b;
-      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
       padding: 1.5rem;
       width: 90%;
-      max-width: 450px;
+      max-width: 440px;
     }
 
     .modal h3 {
-      font-size: 1.1rem;
+      font-size: 1rem;
+      font-weight: 600;
       margin-bottom: 1rem;
-      color: #f8fafc;
     }
 
     .modal input, .modal textarea {
       width: 100%;
-      padding: 0.6rem 0.85rem;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      color: #e2e8f0;
-      font-size: 0.9rem;
-      outline: none;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.65rem;
     }
 
-    .modal textarea {
-      min-height: 60px;
-      resize: vertical;
-      font-family: inherit;
-    }
-
-    .modal input:focus, .modal textarea:focus { border-color: #60a5fa; }
+    .modal textarea { min-height: 70px; resize: vertical; }
 
     .modal-actions {
       display: flex;
       justify-content: flex-end;
       gap: 0.5rem;
-      margin-top: 0.5rem;
+      margin-top: 0.25rem;
     }
 
+    /* ===== PROGRESS BAR ===== */
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--green));
+      border-radius: 4px;
+      transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ===== RESPONSIVE ===== */
     @media (max-width: 600px) {
+      .container { padding: 1.5rem 1rem; }
       .form-row { flex-direction: column; }
-      .task-item { flex-wrap: wrap; }
-      .task-actions { width: 100%; justify-content: flex-end; }
+      .task-actions { opacity: 1; }
+      .health-panel { flex-direction: column; gap: 0.75rem; align-items: flex-start; }
+      .health-right { align-self: flex-end; }
+      .status-bar { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+      .status-card { padding: 0.85rem 0.5rem; }
+      .status-card .number { font-size: 1.5rem; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Task Manager</h1>
-      <p>Gestion de tareas — Express + PostgreSQL</p>
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        </div>
+        <h1>Task Manager</h1>
+      </div>
+      <p>Express + PostgreSQL + CI/CD Pipeline</p>
       <div class="nav-links">
-        <a href="/api/docs" target="_blank">Swagger Docs</a>
-        <a href="/api/health" target="_blank">Health Check</a>
+        <a href="/api/docs" target="_blank">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          API Docs
+        </a>
+        <a href="/api/tasks" target="_blank">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+          JSON
+        </a>
       </div>
     </header>
 
+    <!-- Health Check Panel -->
+    <div class="health-panel checking" id="healthPanel">
+      <div class="health-left">
+        <div class="health-indicator"></div>
+        <div>
+          <div class="health-label" id="healthLabel">Verificando...</div>
+          <div class="health-sublabel" id="healthSub">conectando al servidor</div>
+        </div>
+      </div>
+      <div class="health-right">
+        <div class="health-meta">
+          <div id="healthLatency">--</div>
+          <div id="healthTime">--</div>
+        </div>
+        <button class="health-refresh" onclick="checkHealth()" title="Verificar conexion">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
     <div class="status-bar">
       <div class="status-card total">
         <div class="number" id="totalCount">0</div>
@@ -366,6 +776,7 @@
       <div class="status-card done">
         <div class="number" id="doneCount">0</div>
         <div class="label">Completadas</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
       </div>
       <div class="status-card pending">
         <div class="number" id="pendingCount">0</div>
@@ -375,9 +786,9 @@
 
     <!-- Create single -->
     <div class="form-section">
-      <h2>Nueva Tarea</h2>
+      <h2><span class="icon">+</span> Nueva Tarea</h2>
       <div class="form-row">
-        <input type="text" id="newTitle" placeholder="Titulo de la tarea" />
+        <input type="text" id="newTitle" placeholder="Que necesitas hacer?" />
         <input type="text" id="newDesc" placeholder="Descripcion (opcional)" />
         <button class="btn btn-primary" onclick="createTask()">Crear</button>
       </div>
@@ -385,25 +796,31 @@
 
     <!-- Bulk create -->
     <div class="form-section">
-      <h2>Crear en Lote (Bulk)</h2>
-      <div class="bulk-hint">Una tarea por linea. Formato: <code>titulo | descripcion</code> (la descripcion es opcional)</div>
+      <h2><span class="icon">++</span> Crear en Lote</h2>
+      <div class="bulk-hint">Una tarea por linea. Formato: <code>titulo | descripcion</code></div>
       <textarea class="bulk-area" id="bulkInput" placeholder="Estudiar Docker | Completar proyecto&#10;Configurar CI/CD&#10;Escribir tests | Minimo 5 tests"></textarea>
       <button class="btn btn-success" onclick="createBulk()">Crear Todas</button>
     </div>
 
     <!-- Task list -->
+    <div class="section-header">
+      <h2>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Tareas
+      </h2>
+    </div>
     <ul class="task-list" id="taskList"></ul>
   </div>
 
   <!-- Edit modal -->
-  <div class="modal-overlay" id="editModal">
+  <div class="modal-overlay" id="editModal" onclick="if(event.target===this)closeModal()">
     <div class="modal">
       <h3>Editar Tarea</h3>
       <input type="hidden" id="editId" />
       <input type="text" id="editTitle" placeholder="Titulo" />
       <textarea id="editDesc" placeholder="Descripcion"></textarea>
       <div class="modal-actions">
-        <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
         <button class="btn btn-primary" onclick="saveEdit()">Guardar</button>
       </div>
     </div>
@@ -413,18 +830,80 @@
 
   <script>
     const API = '/api/tasks';
+    let prevCounts = { total: -1, done: -1, pending: -1 };
 
+    // ===== HEALTH CHECK =====
+    async function checkHealth() {
+      const panel = document.getElementById('healthPanel');
+      const label = document.getElementById('healthLabel');
+      const sub = document.getElementById('healthSub');
+      const latency = document.getElementById('healthLatency');
+      const time = document.getElementById('healthTime');
+      const btn = document.querySelector('.health-refresh');
+
+      panel.className = 'health-panel checking';
+      label.textContent = 'Verificando...';
+      sub.textContent = 'conectando al servidor';
+      btn.classList.add('spinning');
+
+      const start = performance.now();
+      try {
+        const res = await fetch('/api/health');
+        const ms = Math.round(performance.now() - start);
+        const data = await res.json();
+
+        if (data.status === 'ok') {
+          panel.className = 'health-panel ok';
+          label.textContent = 'Sistema operativo';
+          sub.textContent = 'API + PostgreSQL';
+          latency.textContent = ms + 'ms';
+          time.textContent = new Date(data.timestamp).toLocaleTimeString();
+        } else {
+          throw new Error('unhealthy');
+        }
+      } catch (e) {
+        panel.className = 'health-panel error';
+        label.textContent = 'Sin conexion';
+        sub.textContent = 'servidor no disponible';
+        latency.textContent = '--';
+        time.textContent = '--';
+      }
+      setTimeout(() => btn.classList.remove('spinning'), 600);
+    }
+
+    // ===== TASKS =====
     async function loadTasks() {
-      const res = await fetch(API);
-      const tasks = await res.json();
-      renderTasks(tasks);
-      updateStats(tasks);
+      try {
+        const res = await fetch(API);
+        const tasks = await res.json();
+        renderTasks(tasks);
+        updateStats(tasks);
+      } catch (e) {
+        document.getElementById('taskList').innerHTML =
+          '<div class="empty-state"><p>Error al cargar tareas</p></div>';
+      }
+    }
+
+    function animateNumber(el, value) {
+      el.textContent = value;
+      el.classList.remove('number-animate');
+      void el.offsetWidth;
+      el.classList.add('number-animate');
     }
 
     function updateStats(tasks) {
-      document.getElementById('totalCount').textContent = tasks.length;
-      document.getElementById('doneCount').textContent = tasks.filter(t => t.completed).length;
-      document.getElementById('pendingCount').textContent = tasks.filter(t => !t.completed).length;
+      const total = tasks.length;
+      const done = tasks.filter(t => t.completed).length;
+      const pending = total - done;
+
+      if (total !== prevCounts.total) animateNumber(document.getElementById('totalCount'), total);
+      if (done !== prevCounts.done) animateNumber(document.getElementById('doneCount'), done);
+      if (pending !== prevCounts.pending) animateNumber(document.getElementById('pendingCount'), pending);
+
+      prevCounts = { total, done, pending };
+
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      document.getElementById('progressFill').style.width = pct + '%';
     }
 
     function renderTasks(tasks) {
@@ -432,24 +911,26 @@
       if (tasks.length === 0) {
         list.innerHTML = `
           <div class="empty-state">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
+            <div class="empty-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            </div>
             <p>No hay tareas todavia</p>
-            <p style="font-size:0.8rem;margin-top:0.5rem">Crea una tarea arriba para comenzar</p>
+            <p class="sub">Crea una tarea arriba para comenzar</p>
           </div>`;
         return;
       }
-      list.innerHTML = tasks.map(t => `
-        <li class="task-item ${t.completed ? 'completed' : ''}">
-          <div class="task-checkbox" onclick="toggleTask(${t.id}, ${!t.completed})"></div>
+      list.innerHTML = tasks.map((t, i) => `
+        <li class="task-item ${t.completed ? 'completed' : ''}" style="animation-delay:${i * 0.04}s">
+          <div class="task-checkbox" onclick="toggleTask(${t.id}, ${!t.completed})">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
           <div class="task-info">
             <div class="task-title">${esc(t.title)}</div>
             ${t.description ? `<div class="task-desc">${esc(t.description)}</div>` : ''}
             <div class="task-date">${new Date(t.created_at).toLocaleString()}</div>
           </div>
           <div class="task-actions">
-            <button class="btn btn-secondary btn-sm" onclick="openEdit(${t.id}, '${esc(t.title)}', '${esc(t.description || '')}')">Editar</button>
+            <button class="btn btn-ghost btn-sm" onclick="openEdit(${t.id}, '${esc(t.title)}', '${esc(t.description || '')}')">Editar</button>
             <button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})">Eliminar</button>
           </div>
         </li>
@@ -463,8 +944,10 @@
     }
 
     async function createTask() {
-      const title = document.getElementById('newTitle').value.trim();
-      const description = document.getElementById('newDesc').value.trim();
+      const titleEl = document.getElementById('newTitle');
+      const descEl = document.getElementById('newDesc');
+      const title = titleEl.value.trim();
+      const description = descEl.value.trim();
       if (!title) return toast('El titulo es obligatorio', 'error');
       const res = await fetch(API, {
         method: 'POST',
@@ -472,8 +955,8 @@
         body: JSON.stringify({ title, description: description || undefined })
       });
       if (res.ok) {
-        document.getElementById('newTitle').value = '';
-        document.getElementById('newDesc').value = '';
+        titleEl.value = '';
+        descEl.value = '';
         toast('Tarea creada');
         loadTasks();
       } else {
@@ -517,10 +1000,7 @@
     async function deleteTask(id) {
       if (!confirm('Eliminar esta tarea?')) return;
       const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        toast('Tarea eliminada');
-        loadTasks();
-      }
+      if (res.ok) { toast('Tarea eliminada'); loadTasks(); }
     }
 
     function openEdit(id, title, desc) {
@@ -528,6 +1008,7 @@
       document.getElementById('editTitle').value = title;
       document.getElementById('editDesc').value = desc;
       document.getElementById('editModal').classList.add('active');
+      document.getElementById('editTitle').focus();
     }
 
     function closeModal() {
@@ -544,26 +1025,31 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description })
       });
-      if (res.ok) {
-        closeModal();
-        toast('Tarea actualizada');
-        loadTasks();
-      }
+      if (res.ok) { closeModal(); toast('Tarea actualizada'); loadTasks(); }
     }
 
     function toast(msg, type = 'success') {
       const el = document.getElementById('toast');
-      el.textContent = msg;
+      const icon = type === 'success' ? '\u2713' : '\u2717';
+      el.innerHTML = `<span>${icon}</span> ${msg}`;
       el.className = `toast ${type} show`;
-      setTimeout(() => el.classList.remove('show'), 2500);
+      setTimeout(() => el.classList.remove('show'), 2800);
     }
 
-    // Listen for Enter on title input
+    // Keyboard shortcuts
     document.getElementById('newTitle').addEventListener('keydown', e => {
       if (e.key === 'Enter') createTask();
     });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
 
+    // Init
+    checkHealth();
     loadTasks();
+
+    // Auto-refresh health every 30s
+    setInterval(checkHealth, 30000);
   </script>
 </body>
 </html>
