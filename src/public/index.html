@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    .nav-links {
+      margin-top: 0.75rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .nav-links a {
+      color: #60a5fa;
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 0.25rem 0.75rem;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover {
+      background: #1e293b;
+      border-color: #60a5fa;
+    }
+
+    .status-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .status-card {
+      flex: 1;
+      min-width: 120px;
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .status-card .number {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .status-card .label {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-card.total .number { color: #60a5fa; }
+    .status-card.done .number { color: #34d399; }
+    .status-card.pending .number { color: #fbbf24; }
+
+    /* Forms */
+    .form-section {
+      background: #1e293b;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-section h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #f8fafc;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .form-row input {
+      flex: 1;
+      min-width: 150px;
+      padding: 0.6rem 0.85rem;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-row input:focus { border-color: #60a5fa; }
+    .form-row input::placeholder { color: #64748b; }
+
+    .btn {
+      padding: 0.6rem 1.25rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-success { background: #22c55e; color: #fff; }
+    .btn-success:hover { background: #16a34a; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+
+    /* Bulk form */
+    .bulk-area {
+      width: 100%;
+      min-height: 80px;
+      padding: 0.75rem;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #e2e8f0;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      resize: vertical;
+      outline: none;
+      margin-bottom: 0.75rem;
+    }
+
+    .bulk-area:focus { border-color: #60a5fa; }
+
+    .bulk-hint {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Task list */
+    .task-list { list-style: none; }
+
+    .task-item {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: background 0.15s;
+    }
+
+    .task-item:hover { background: #253348; }
+
+    .task-item.completed { opacity: 0.6; }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .task-item.completed .task-checkbox {
+      background: #22c55e;
+      border-color: #22c55e;
+    }
+
+    .task-checkbox::after {
+      content: '';
+      display: none;
+      width: 6px;
+      height: 10px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      margin-bottom: 2px;
+    }
+
+    .task-item.completed .task-checkbox::after { display: block; }
+
+    .task-info { flex: 1; min-width: 0; }
+
+    .task-title {
+      font-weight: 500;
+      color: #f1f5f9;
+      margin-bottom: 0.15rem;
+    }
+
+    .task-item.completed .task-title {
+      text-decoration: line-through;
+      color: #94a3b8;
+    }
+
+    .task-desc {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .task-date {
+      font-size: 0.7rem;
+      color: #475569;
+      font-family: monospace;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 0.4rem;
+      flex-shrink: 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #64748b;
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 100;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: #22c55e; color: #fff; }
+    .toast.error { background: #ef4444; color: #fff; }
+
+    /* Edit modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 450px;
+    }
+
+    .modal h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: #f8fafc;
+    }
+
+    .modal input, .modal textarea {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      outline: none;
+      margin-bottom: 0.75rem;
+    }
+
+    .modal textarea {
+      min-height: 60px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .modal input:focus, .modal textarea:focus { border-color: #60a5fa; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .form-row { flex-direction: column; }
+      .task-item { flex-wrap: wrap; }
+      .task-actions { width: 100%; justify-content: flex-end; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Task Manager</h1>
+      <p>Gestion de tareas — Express + PostgreSQL</p>
+      <div class="nav-links">
+        <a href="/api/docs" target="_blank">Swagger Docs</a>
+        <a href="/api/health" target="_blank">Health Check</a>
+      </div>
+    </header>
+
+    <div class="status-bar">
+      <div class="status-card total">
+        <div class="number" id="totalCount">0</div>
+        <div class="label">Total</div>
+      </div>
+      <div class="status-card done">
+        <div class="number" id="doneCount">0</div>
+        <div class="label">Completadas</div>
+      </div>
+      <div class="status-card pending">
+        <div class="number" id="pendingCount">0</div>
+        <div class="label">Pendientes</div>
+      </div>
+    </div>
+
+    <!-- Create single -->
+    <div class="form-section">
+      <h2>Nueva Tarea</h2>
+      <div class="form-row">
+        <input type="text" id="newTitle" placeholder="Titulo de la tarea" />
+        <input type="text" id="newDesc" placeholder="Descripcion (opcional)" />
+        <button class="btn btn-primary" onclick="createTask()">Crear</button>
+      </div>
+    </div>
+
+    <!-- Bulk create -->
+    <div class="form-section">
+      <h2>Crear en Lote (Bulk)</h2>
+      <div class="bulk-hint">Una tarea por linea. Formato: <code>titulo | descripcion</code> (la descripcion es opcional)</div>
+      <textarea class="bulk-area" id="bulkInput" placeholder="Estudiar Docker | Completar proyecto&#10;Configurar CI/CD&#10;Escribir tests | Minimo 5 tests"></textarea>
+      <button class="btn btn-success" onclick="createBulk()">Crear Todas</button>
+    </div>
+
+    <!-- Task list -->
+    <ul class="task-list" id="taskList"></ul>
+  </div>
+
+  <!-- Edit modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <h3>Editar Tarea</h3>
+      <input type="hidden" id="editId" />
+      <input type="text" id="editTitle" placeholder="Titulo" />
+      <textarea id="editDesc" placeholder="Descripcion"></textarea>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveEdit()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = '/api/tasks';
+
+    async function loadTasks() {
+      const res = await fetch(API);
+      const tasks = await res.json();
+      renderTasks(tasks);
+      updateStats(tasks);
+    }
+
+    function updateStats(tasks) {
+      document.getElementById('totalCount').textContent = tasks.length;
+      document.getElementById('doneCount').textContent = tasks.filter(t => t.completed).length;
+      document.getElementById('pendingCount').textContent = tasks.filter(t => !t.completed).length;
+    }
+
+    function renderTasks(tasks) {
+      const list = document.getElementById('taskList');
+      if (tasks.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            <p>No hay tareas todavia</p>
+            <p style="font-size:0.8rem;margin-top:0.5rem">Crea una tarea arriba para comenzar</p>
+          </div>`;
+        return;
+      }
+      list.innerHTML = tasks.map(t => `
+        <li class="task-item ${t.completed ? 'completed' : ''}">
+          <div class="task-checkbox" onclick="toggleTask(${t.id}, ${!t.completed})"></div>
+          <div class="task-info">
+            <div class="task-title">${esc(t.title)}</div>
+            ${t.description ? `<div class="task-desc">${esc(t.description)}</div>` : ''}
+            <div class="task-date">${new Date(t.created_at).toLocaleString()}</div>
+          </div>
+          <div class="task-actions">
+            <button class="btn btn-secondary btn-sm" onclick="openEdit(${t.id}, '${esc(t.title)}', '${esc(t.description || '')}')">Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})">Eliminar</button>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    function esc(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML.replace(/'/g, "\\'");
+    }
+
+    async function createTask() {
+      const title = document.getElementById('newTitle').value.trim();
+      const description = document.getElementById('newDesc').value.trim();
+      if (!title) return toast('El titulo es obligatorio', 'error');
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description: description || undefined })
+      });
+      if (res.ok) {
+        document.getElementById('newTitle').value = '';
+        document.getElementById('newDesc').value = '';
+        toast('Tarea creada');
+        loadTasks();
+      } else {
+        const data = await res.json();
+        toast(data.error, 'error');
+      }
+    }
+
+    async function createBulk() {
+      const raw = document.getElementById('bulkInput').value.trim();
+      if (!raw) return toast('Escribe al menos una tarea', 'error');
+      const tasks = raw.split('\n').filter(l => l.trim()).map(line => {
+        const [title, ...rest] = line.split('|');
+        return { title: title.trim(), description: rest.join('|').trim() || undefined };
+      });
+      const res = await fetch(API + '/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tasks })
+      });
+      if (res.ok) {
+        const created = await res.json();
+        document.getElementById('bulkInput').value = '';
+        toast(`${created.length} tareas creadas`);
+        loadTasks();
+      } else {
+        const data = await res.json();
+        toast(data.error, 'error');
+      }
+    }
+
+    async function toggleTask(id, completed) {
+      await fetch(`${API}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed })
+      });
+      loadTasks();
+    }
+
+    async function deleteTask(id) {
+      if (!confirm('Eliminar esta tarea?')) return;
+      const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        toast('Tarea eliminada');
+        loadTasks();
+      }
+    }
+
+    function openEdit(id, title, desc) {
+      document.getElementById('editId').value = id;
+      document.getElementById('editTitle').value = title;
+      document.getElementById('editDesc').value = desc;
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('editModal').classList.remove('active');
+    }
+
+    async function saveEdit() {
+      const id = document.getElementById('editId').value;
+      const title = document.getElementById('editTitle').value.trim();
+      const description = document.getElementById('editDesc').value.trim();
+      if (!title) return toast('El titulo es obligatorio', 'error');
+      const res = await fetch(`${API}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description })
+      });
+      if (res.ok) {
+        closeModal();
+        toast('Tarea actualizada');
+        loadTasks();
+      }
+    }
+
+    function toast(msg, type = 'success') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = `toast ${type} show`;
+      setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    // Listen for Enter on title input
+    document.getElementById('newTitle').addEventListener('keydown', e => {
+      if (e.key === 'Enter') createTask();
+    });
+
+    loadTasks();
+  </script>
+</body>
+</html>
