@@ -462,7 +462,7 @@ final_proyect/
 
 ## Autor
 
-- **Camilo** - Desarrollo completo del proyecto
+- **Hector Henriquez** - 41611213 - Desarrollo completo del proyecto
 
 ---
 

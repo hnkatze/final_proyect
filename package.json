@@ -19,7 +19,7 @@
     "ci-cd",
     "docker"
   ],
-  "author": "Camilo",
+  "author": "Hector Henriquez",
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
