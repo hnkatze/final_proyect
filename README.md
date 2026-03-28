@@ -5,7 +5,7 @@
 
 REST API para gestion de tareas construida con **Node.js**, **Express** y **PostgreSQL**. Incluye frontend web integrado, documentacion Swagger, pipeline completo de CI/CD con GitHub Actions y deploy automatico en Railway.
 
-> **Deploy en produccion**: [https://api-muni-bo-develop.up.railway.app](https://api-muni-bo-develop.up.railway.app)
+> **Deploy en produccion**: [https://finalproyect-production-8ea8.up.railway.app](https://finalproyect-production-8ea8.up.railway.app)
 
 ---
 
@@ -211,9 +211,9 @@ La API cuenta con documentacion interactiva generada con Swagger/OpenAPI 3.0:
 
 | Recurso | URL Local | URL Produccion |
 |---------|-----------|---------------|
-| **Frontend** | http://localhost:3000 | https://api-muni-bo-develop.up.railway.app |
-| **Swagger UI** | http://localhost:3000/api/docs | https://api-muni-bo-develop.up.railway.app/api/docs |
-| **JSON Spec** | http://localhost:3000/api/docs.json | https://api-muni-bo-develop.up.railway.app/api/docs.json |
+| **Frontend** | http://localhost:3000 | https://finalproyect-production-8ea8.up.railway.app |
+| **Swagger UI** | http://localhost:3000/api/docs | https://finalproyect-production-8ea8.up.railway.app/api/docs |
+| **JSON Spec** | http://localhost:3000/api/docs.json | https://finalproyect-production-8ea8.up.railway.app/api/docs.json |
 
 ---
 
@@ -226,7 +226,7 @@ La API cuenta con documentacion interactiva generada con Swagger/OpenAPI 3.0:
 | GET | `/api/health` | Estado del servidor y la base de datos |
 
 ```bash
-curl https://api-muni-bo-develop.up.railway.app/api/health
+curl https://finalproyect-production-8ea8.up.railway.app/api/health
 
 # Respuesta:
 # { "status": "ok", "timestamp": "2026-03-27T..." }
@@ -258,16 +258,16 @@ curl https://api-muni-bo-develop.up.railway.app/api/health
 
 ```bash
 # Listar todas las tareas
-curl https://api-muni-bo-develop.up.railway.app/api/tasks
+curl https://finalproyect-production-8ea8.up.railway.app/api/tasks
 
 # Filtrar pendientes con prioridad alta
-curl "https://api-muni-bo-develop.up.railway.app/api/tasks?completed=false&priority=high"
+curl "https://finalproyect-production-8ea8.up.railway.app/api/tasks?completed=false&priority=high"
 
 # Buscar tareas
-curl "https://api-muni-bo-develop.up.railway.app/api/tasks?search=docker"
+curl "https://finalproyect-production-8ea8.up.railway.app/api/tasks?search=docker"
 
 # Crear tarea
-curl -X POST https://api-muni-bo-develop.up.railway.app/api/tasks \
+curl -X POST https://finalproyect-production-8ea8.up.railway.app/api/tasks \
   -H "Content-Type: application/json" \
   -d '{"title": "Estudiar Docker", "description": "Completar proyecto final", "priority": "high"}'
 
@@ -283,23 +283,23 @@ curl -X POST https://api-muni-bo-develop.up.railway.app/api/tasks \
 # }
 
 # Crear varias tareas a la vez
-curl -X POST https://api-muni-bo-develop.up.railway.app/api/tasks/bulk \
+curl -X POST https://finalproyect-production-8ea8.up.railway.app/api/tasks/bulk \
   -H "Content-Type: application/json" \
   -d '{"tasks": [{"title": "Tarea 1", "priority": "high"}, {"title": "Tarea 2"}, {"title": "Tarea 3", "priority": "low"}]}'
 
 # Ver estadisticas
-curl https://api-muni-bo-develop.up.railway.app/api/tasks/stats
+curl https://finalproyect-production-8ea8.up.railway.app/api/tasks/stats
 
 # Respuesta:
 # { "total": 10, "completed": 6, "pending": 4, "high": 3, "medium": 5, "low": 2, "completion_rate": "60.0" }
 
 # Actualizar tarea
-curl -X PUT https://api-muni-bo-develop.up.railway.app/api/tasks/1 \
+curl -X PUT https://finalproyect-production-8ea8.up.railway.app/api/tasks/1 \
   -H "Content-Type: application/json" \
   -d '{"completed": true, "priority": "medium"}'
 
 # Eliminar tarea
-curl -X DELETE https://api-muni-bo-develop.up.railway.app/api/tasks/1
+curl -X DELETE https://finalproyect-production-8ea8.up.railway.app/api/tasks/1
 ```
 
 ---
@@ -377,9 +377,9 @@ La aplicacion esta desplegada en **Railway**:
 
 | Recurso | URL |
 |---------|-----|
-| **App (Frontend + API)** | https://api-muni-bo-develop.up.railway.app |
-| **Swagger Docs** | https://api-muni-bo-develop.up.railway.app/api/docs |
-| **Health Check** | https://api-muni-bo-develop.up.railway.app/api/health |
+| **App (Frontend + API)** | https://finalproyect-production-8ea8.up.railway.app |
+| **Swagger Docs** | https://finalproyect-production-8ea8.up.railway.app/api/docs |
+| **Health Check** | https://finalproyect-production-8ea8.up.railway.app/api/health |
 
 - PostgreSQL provisionado como servicio interno de Railway
 - Variables de entorno: `DATABASE_URL`, `PORT`, `NODE_ENV`
@@ -438,7 +438,7 @@ final_proyect/
 ## Screenshots
 
 ### Frontend Web (Gestion de Tareas)
-> Disponible en: https://api-muni-bo-develop.up.railway.app
+> Disponible en: https://finalproyect-production-8ea8.up.railway.app
 
 - Dashboard con contadores animados (total, completadas, pendientes, progreso %)
 - Health monitor en tiempo real con latencia
@@ -452,7 +452,7 @@ final_proyect/
 - Dark mode, responsive, animaciones
 
 ### Swagger UI (Documentacion Interactiva)
-> Disponible en: https://api-muni-bo-develop.up.railway.app/api/docs
+> Disponible en: https://finalproyect-production-8ea8.up.railway.app/api/docs
 
 - Todos los endpoints documentados con schemas
 - Probar endpoints directamente desde el navegador
